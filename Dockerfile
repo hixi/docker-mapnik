@@ -13,7 +13,7 @@ RUN apt-get update && apt-get -qq install --yes \
   ttf-indic-fonts-core \
   fonts-taml-tscu \
   ttf-kannada-fonts \
-  build-essential openssh-server sudo software-properties-common curl \
+  build-essential openssh-server software-properties-common curl \
   libboost-dev libboost-filesystem-dev libboost-program-options-dev libboost-python-dev libboost-regex-dev libboost-system-dev libboost-thread-dev \
   libicu-dev libtiff4-dev libfreetype6-dev libpng12-dev libxml2-dev libproj-dev libsqlite3-dev libgdal-dev libcairo-dev python-cairo-dev postgresql-contrib libharfbuzz-dev \
   libicu-dev \
@@ -32,22 +32,24 @@ RUN apt-get update && apt-get -qq install --yes \
   python-pip \
   git-core
 
+# Install more recent Node
+RUN curl -sL https://deb.nodesource.com/setup_5.x | bash -
+RUN apt-get update && apt-get install -y nodejs
+
 RUN pip install -U pip
 
 ENV HOME /home/mapnik
 
 WORKDIR $HOME
 
-ADD ./mapnik $HOME/mapnik
+COPY ./mapnik $HOME/mapnik
 
 WORKDIR $HOME/mapnik
 
 RUN ./configure && JOBS=4 make && make install
 
-ADD ./python-mapnik $HOME/python-mapnik
-
-WORKDIR $HOME/python-mapnik
-
-RUN python setup.py install
+RUN pip install mapnik
+RUN npm install -g carto millstone
 
 WORKDIR $HOME
+CMD ["/bin/bash"]
